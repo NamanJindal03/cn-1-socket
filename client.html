@@ -6,17 +6,41 @@
     <title>Document</title>
 </head>
 <body>
+
+    <div>
+
+        <input type="text" id="messageInput">
+    </div>
     
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 
     <script>
         const socket = io.connect('http://localhost:3000');
 
-        socket.emit('first-timer', 'sunn raha hai kya?');
+        const userName = prompt('Enter unique name');
+        socket.emit('store-user-info', userName);
 
-        socket.on('revert', (message)=>{
-            console.log('I got message on the client and the messsage is .......');
-            console.log(message)
+        // socket.emit('first-timer', 'sunn raha hai kya?');
+
+        // socket.on('revert', (message)=>{
+        //     console.log('I got message on the client and the messsage is .......');
+        //     console.log(message)
+        // })
+
+        //send update to server whenever the user is typing
+        document.querySelector('#messageInput').addEventListener('keyup', (e)=>{
+            const value = e.target.value;
+            console.log('typing started')
+            socket.emit('is_typing', 'typing.......')
+        })
+
+
+        socket.on('users', (data)=>{
+
+            console.log(data);
+        })
+        socket.on('weather_info_update', (data)=>{
+            console.log(data)
         })
 
     </script>
