@@ -29,7 +29,14 @@ io.on('connection', (socket) => {
     // })
     socket.on('store-user-info', async (username)=>{
         socket.userInfo = username;
-        const chatHistoryData = await chatModel.find().sort({createdAt: 1}).limit(10);
+        let chatHistoryData = await chatModel.find().sort({createdAt: 1}).limit(10);
+        chatHistoryData = chatHistoryData.map((chat)=>{
+            return {
+                message: chat.message,
+                user: chat.user,
+                time: new Date(chat.createdAt).toDateString()
+            }
+        })
         socket.emit('chat-history', chatHistoryData)
     })
 
