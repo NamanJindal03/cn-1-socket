@@ -2,6 +2,8 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import { connectionToMongo } from './db.js';
+import { chatModel } from './chat.schema.js';
 
 const app = express();
 app.use(cors());
@@ -9,7 +11,7 @@ app.use(cors());
 let users = 0;
 
 const server = http.createServer(app);
-
+connectionToMongo()
 const io = new Server(server, {
     cors: {
         origin: '*',
@@ -25,8 +27,15 @@ io.on('connection', (socket) => {
     //     console.log(message);
     //     socket.emit('revert', 'yes yes yes yes');
     // })
-    socket.on('store-user-info', (username)=>{
+    socket.on('store-user-info', async (username)=>{
         socket.userInfo = username;
+        const chatHistoryData = await chatModel.find().sort({createdAt: 1}).limit(10);
+        socket.emit('chat-history', chatHistoryData)
+    })
+
+    socket.on('chat', async (message)=>{
+        await chatModel.create({user: socket.userInfo, message: message})
+        socket.broadcast.emit('broadcast_chat', `${socket.userInfo}: ${message}`)
     })
 
     //whenever I have to update the user count, I will be initiating this event

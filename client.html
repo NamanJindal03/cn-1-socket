@@ -10,6 +10,7 @@
     <div>
 
         <input type="text" id="messageInput">
+        <button id="submitMessage">Send</button>
     </div>
     
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
@@ -20,6 +21,10 @@
         const userName = prompt('Enter unique name');
         socket.emit('store-user-info', userName);
 
+        socket.on('chat-history', (chatHistoryArray)=>{
+            console.log(chatHistoryArray);
+        })
+
         // socket.emit('first-timer', 'sunn raha hai kya?');
 
         // socket.on('revert', (message)=>{
@@ -28,12 +33,23 @@
         // })
 
         //send update to server whenever the user is typing
-        document.querySelector('#messageInput').addEventListener('keyup', (e)=>{
-            const value = e.target.value;
-            console.log('typing started')
-            socket.emit('is_typing', 'typing.......')
+        // document.querySelector('#messageInput').addEventListener('keyup', (e)=>{
+        //     const value = e.target.value;
+        //     console.log('typing started')
+        //     socket.emit('is_typing', 'typing.......')
+        // })
+
+        const messageBoxElem = document.querySelector('#messageInput')
+        document.querySelector('#submitMessage').addEventListener('click', (e)=>{
+            const message = messageBoxElem.value;
+            messageBoxElem.value = '';
+
+            socket.emit('chat', message);
         })
 
+        socket.on('broadcast_chat', (message)=>{
+            console.log('braodcast------', message)
+        })
 
         socket.on('users', (data)=>{
 
